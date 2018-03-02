@@ -16,7 +16,6 @@ class TypeaheadApiTest < ActiveSupport::TestCase
     @sprofile = 'adm'
     @stags = 'everything'
     @sseq = 7
-    @scom = 'comm'
   end
 
   test 'typeahead all functionality' do
@@ -118,21 +117,5 @@ class TypeaheadApiTest < ActiveSupport::TestCase
     matcher = JsonExpressions::Matcher.new(pattern)
 
     assert matcher =~ JSON.parse(last_response.body)
-  end
-
-  test 'typeahead comments functionality' do
-    get '/api/typeahead/comments?srchString=comm&seq=7'
-    assert last_response.ok?
-
-    # Expected comment pattern
-    pattern = {
-      srchParams: {
-        srchString: @scom,
-        seq: @sseq
-      }.ignore_extra_keys!
-    }.ignore_extra_keys! 
-    matcher = JsonExpressions::Matcher.new(pattern)
-
-    assert matcher =~ JSON.parse(last_response.body)    
   end
 end

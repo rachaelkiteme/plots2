@@ -39,6 +39,7 @@
 //= require jsdiff/diff.js
 //= require main_image.js
 //= require restful_typeahead.js
+//= require searchform.js
 //= require users.js
 //= require searchform.js
 //= require location_tags.js
@@ -48,6 +49,3 @@
 //= require short-code-forms/dist/short-code-prompts.js
 //= require wikis.js
 //= require chart.js/dist/Chart.js
-//  require turbolinks // Temporarily removed while fixing
-//= require google_analytics.js
-

@@ -5,7 +5,7 @@
 class SubscriptionController < ApplicationController
 
   respond_to :html, :xml, :json
-  before_filter :require_user, :only => [:create, :delete, :index, :digest]
+  before_filter :require_user, :only => [:create, :delete, :index]
 
   def index
     @title = "Subscriptions"
@@ -53,7 +53,7 @@ class SubscriptionController < ApplicationController
         end
 
         # test for uniqueness, handle it as a validation error if you like
-        if TagSelection.where(following: true, user_id: current_user.uid, tid: tag.tid).length.positive?
+        if TagSelection.where(following: true, user_id: current_user.uid, tid: tag.tid).length > 0
           flash[:error] = "You are already subscribed to '#{params[:name]}'"
           redirect_to "/subscriptions" + "?_=" + Time.now.to_i.to_s
         else
@@ -108,11 +108,6 @@ class SubscriptionController < ApplicationController
         redirect_to "/subscriptions" + "?_=" + Time.now.to_i.to_s
       end
     end
-  end
-
-  def digest
-    @wikis = current_user.content_followed_in_period(Time.now - 1.week, Time.now)
-    render :template => "subscriptions/digest"
   end
 
   private
