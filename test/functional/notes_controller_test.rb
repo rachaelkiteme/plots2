@@ -574,4 +574,56 @@ class NotesControllerTest < ActionController::TestCase
       assert_equal I18n.t('notes_controller.research_note_published'), flash[:notice]
     end
   end
+
+  test "should delete wiki if other author have not contributed" do
+    node = nodes(:one)
+    length=node.authors.uniq.length
+    user = UserSession.create(users(:jeff))
+    assert_equal 1,length
+
+    assert_difference 'Node.count', -1 do
+      post :delete, id: node.nid
+    end
+
+    assert_redirected_to '/dashboard' + '?_=' + Time.now.to_i.to_s
+  end 
+
+  test "should not delete wiki if other author have contributed" do
+    node = nodes(:about)
+    length=node.authors.uniq.length
+    assert_not_equal 1,length
+    user = UserSession.create(users(:jeff))
+
+    assert_no_difference 'Node.count' do
+      get :delete, id: node.nid
+    end
+    
+    assert_redirected_to '/dashboard' + '?_=' + Time.now.to_i.to_s
+  end 
+
+  #should change title
+  test 'title change feature in comments when author is logged in' do
+    UserSession.create(users(:jeff))
+    node = nodes(:one)
+    post :update_title, id: '1',title: 'changed title'
+    assert_redirected_to node.path+"#comments"
+    assert_equal node.reload.title, 'changed title'
+  end
+  
+  # should not change title
+  test 'title change feature in comments when author is not logged in' do
+    node = nodes(:one)
+    post :update_title, id: '1',title: 'changed title'
+    assert_redirected_to node.path+"#comments"
+    assert_equal I18n.t('notes_controller.author_can_edit_note'), flash[:error]
+    assert_equal node.reload.title, node.title
+  end
+
+  def test_get_rss_feed
+    get :rss, :format => "rss"
+    assert_response :success   
+    assert_equal 'application/rss+xml', @response.content_type
+  end
+
+
 end
