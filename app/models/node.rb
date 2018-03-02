@@ -38,7 +38,7 @@ class Node < ActiveRecord::Base
   has_many :tag, through: :node_tag
   # these override the above... have to do it manually:
   # has_many :tag, :through => :drupal_node_tag
-  has_many :comments, foreign_key: 'nid' , dependent: :destroy # re-enable in Rails 5
+  has_many :comments, foreign_key: 'nid' #, dependent: :destroy # re-enable in Rails 5
   has_many :drupal_content_type_map, foreign_key: 'nid' #, dependent: :destroy # re-enable in Rails 5
   has_many :drupal_content_field_mappers, foreign_key: 'nid' #, dependent: :destroy # re-enable in Rails 5
   has_many :drupal_content_field_map_editor, foreign_key: 'nid' #, dependent: :destroy # re-enable in Rails 5
@@ -166,11 +166,11 @@ class Node < ActiveRecord::Base
   end
 
   def answered
-    self.answers&.length.positive?
+    self.answers && self.answers.length > 0
   end
 
   def has_accepted_answers
-    self.answers.where(accepted: true).count.positive?
+    self.answers.where(accepted: true).count > 0
   end
   
   # users who like this node
@@ -186,13 +186,12 @@ class Node < ActiveRecord::Base
   def latest
     revisions
       .where(status: 1)
-      .order(timestamp: :desc)
       .first
   end
 
   def revisions
     revision
-      .order(timestamp: :desc)
+      .order('timestamp DESC')
   end
 
   def revision_count
@@ -243,7 +242,7 @@ class Node < ActiveRecord::Base
   end
 
   def body
-    latest&.body
+    latest.body if latest
   end
 
   # was unable to set up this relationship properly with ActiveRecord associations
@@ -326,7 +325,7 @@ class Node < ActiveRecord::Base
               .collect(&:tid)
     node_tag = NodeTag.where('nid = ? AND tid IN (?)', id, tids)
                                      .order('nid DESC')
-    if node_tag&.first
+    if node_tag && node_tag.first
       node_tag.first.tag.name.gsub(tag + ':', '')
     else
       ''
@@ -454,9 +453,9 @@ class Node < ActiveRecord::Base
   def edit_path
     path = if type == 'page' || type == 'tool' || type == 'place'
              '/wiki/edit/' + self.path.split('/').last
-    else
-      '/notes/edit/' + id.to_s
-    end
+           else
+             '/notes/edit/' + id.to_s
+           end
     path
   end
 
@@ -514,9 +513,9 @@ class Node < ActiveRecord::Base
   def add_comment(params = {})
     thread = if !comments.empty? && !comments.last.nil?
                comments.last.next_thread
-    else
-      '01/'
-    end
+             else
+               '01/'
+             end
     c = Comment.new(pid: 0,
                     nid: nid,
                     uid: params[:uid],
@@ -742,7 +741,7 @@ class Node < ActiveRecord::Base
   def activities
     # override with a tag like `activities:h2s`
     if self.has_power_tag('activities')
-      tagname = self.power_tag('activities')
+      tagname = node.power_tag('activities')
     else
       tagname = self.slug_from_path
     end

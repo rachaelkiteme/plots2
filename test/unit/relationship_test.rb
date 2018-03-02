@@ -13,11 +13,11 @@ class RelationshipTest < ActiveSupport::TestCase
 
   test 'should require follower_id' do
     @relationship.follower_id = nil
-    assert_not @relationship.valid?
+    assert @relationship.valid?
   end
 
   test 'should require followed_id' do
     @relationship.followed_id = nil
-    assert_not @relationship.valid?
+    assert @relationship.valid?
   end
 end

@@ -237,8 +237,6 @@ class WikiControllerTest < ActionController::TestCase
     UserSession.find.destroy
   end
 
- 
-
   #  test "normal user should not delete wiki revision" do
   #    post :delete_revision, id: nodes(:organizers).latest.vid
   #    assert_equal flash[:error], "Only admins can delete wiki revisions."
@@ -351,7 +349,6 @@ class WikiControllerTest < ActionController::TestCase
     assert_not_nil assigns(:revision)
     # we subselect because for some reason the view is not returning the `<p>` and `</p>\n` wrapped
     # ... messy, but couldn't find a way to disable simple_format() on the second parameter here.
-    @current_user = users(:bob) # required for below test
     assert_select 'div#content', auto_link(insert_extras(revision.render_body), sanitize: false)[3..-6]
   end
 
@@ -364,7 +361,6 @@ class WikiControllerTest < ActionController::TestCase
     assert_response :success
     assert_not_nil assigns(:node)
     assert_not_nil assigns(:revision)
-    @current_user = users(:bob) # required for below test
     assert_select 'div#content', auto_link(insert_extras(revision.render_body), sanitize: false)[3..-6]
   end
 
@@ -588,5 +584,4 @@ class WikiControllerTest < ActionController::TestCase
     assert_response :success
     assert_select 'div#comments h3', /Comments/
   end
-
 end

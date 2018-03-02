@@ -17,7 +17,7 @@ class DrupalUser < ActiveRecord::Base
   has_many :comments, foreign_key: 'uid'
 
   def user
-    User.where(id: self.id).first
+    User.where(username: name).first
   end
 
   def bio
@@ -41,13 +41,12 @@ class DrupalUser < ActiveRecord::Base
   # End rails-style adaptors
 
   def role
-    user&.role
+    user.role if user
   end
 
   def moderate
     self.status = 5
     save
-    update_user_status(5)
     # user is logged out next time they access current_user in a controller; see application controller
     self
   end
@@ -55,7 +54,6 @@ class DrupalUser < ActiveRecord::Base
   def unmoderate
     self.status = 1
     save
-    update_user_status(1)
     self
   end
 
@@ -63,7 +61,6 @@ class DrupalUser < ActiveRecord::Base
     self.status = 0
     decrease_likes_banned
     save
-    update_user_status(0)
     # user is logged out next time they access current_user in a controller; see application controller
     self
   end
@@ -72,18 +69,11 @@ class DrupalUser < ActiveRecord::Base
     self.status = 1
     increase_likes_unbanned
     save
-    update_user_status(1)
     self
   end
 
   def email
     mail
-  end
-
-  def update_user_status(status)
-    u = self.user
-    u.status = status
-    u.save!
   end
 
   def first_time_poster
@@ -100,25 +90,25 @@ class DrupalUser < ActiveRecord::Base
 
   def liked_notes
     Node.includes(:node_selections)
-      .references(:node_selections)
-      .where("type = 'note' AND node_selections.liking = ? AND node_selections.user_id = ? AND node.status = 1", true, uid)
-      .order('node_selections.nid DESC')
+        .references(:node_selections)
+        .where("type = 'note' AND node_selections.liking = ? AND node_selections.user_id = ? AND node.status = 1", true, uid)
+        .order('node_selections.nid DESC')
   end
 
   def liked_pages
     NodeSelection.where("status = 1 AND user_id = ? AND liking = ? AND (node.type = 'page' OR node.type = 'tool' OR node.type = 'place')", uid, true)
-      .includes(:node)
-      .references(:node)
-      .collect(&:node)
-      .reverse
+                 .includes(:node)
+                 .references(:node)
+                 .collect(&:node)
+                 .reverse
   end
 
   # last node
   def last
     Node.limit(1)
-      .where(uid: uid)
-      .order('changed DESC')
-      .first
+        .where(uid: uid)
+        .order('changed DESC')
+        .first
   end
 
   def profile_values

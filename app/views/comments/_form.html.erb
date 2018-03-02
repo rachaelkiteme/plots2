@@ -1,4 +1,4 @@
-<form id="comment-form" data-remote="true" class="well" <% if params[:controller] == 'questions' %> action= "/answers/create/<%= @node.nid %>" <% else %> action="/comment/create/<%= @node.nid %>" <% end %> method="post" >
+<form id="comment-form" data-remote="true" class="well" <% if params[:controller] == 'questions' %> action= "/answers/create/<%= @node.nid %>" <% else %> action="/comment/create/<%= @node.nid %>" <% end %>>
   <h4 style="margin-top:0;"><%= title %></h4>
 
   <style>
@@ -86,16 +86,6 @@
       $('#comment-form .control-group .help-block ').remove()
       $('#comment-form .control-group').append('<span class="help-block ">Error: there was a problem.</span>')
     })
-
-    function insertTitleSuggestionTemplate() {
-      var element = $('#text-input');
-      var currentText = $('#text-input').val().trim();
-      var template = "\n[propose:title]Propose your title here[/propose]";
-      if(currentText.length == 0)
-        template = "[propose:title]Propose your title here[/propose]";
-      var newText = currentText+template;
-      element.val(newText);
-    }
   </script>
 
   <div class="control-group">
@@ -115,8 +105,7 @@
     <span style="color:#888;"> &nbsp; 
       <br class="visible-xs" /><%= raw t('comments._form.logged_in', :username => current_user.username) %> | 
       <a target="_blank" href="/wiki/authoring-help#Formatting"><%= t('comments._form.formatting') %></a> | 
-      <a onClick="$('#who-is-notified-form').toggle()"><%= t('comments._form.notifications') %></a> | 
-      <a onClick = "insertTitleSuggestionTemplate()">Propose Title</a>
+      <a onClick="$('#who-is-notified-form').toggle()"><%= t('comments._form.notifications') %></a>
     </span>
   </div>
 
